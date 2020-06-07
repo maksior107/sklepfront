@@ -1,5 +1,3 @@
-export type ProductType = 1 | "A" | true | undefined
-
 export class Product {
     private readonly _id: number;
     private readonly _name: string;
@@ -29,12 +27,12 @@ export class Product {
         return this._category;
     }
 
-    static convert(productRow: ProductRow): Product {
-        return new Product(productRow.id, productRow.name, productRow.description, productRow.category);
+    static convert(productRaw: ProductRaw): Product {
+        return new Product(productRaw.id, productRaw.name, productRaw.description, productRaw.category);
     }
 }
 
-export interface ProductRow {
+export interface ProductRaw {
     id: number;
     name: string;
     description: string;

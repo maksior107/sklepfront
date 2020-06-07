@@ -1,54 +1,100 @@
 import * as React from "react";
 import ProductListPage from "./ProductListPage";
-import Axios, {AxiosResponse} from "axios";
-import {Product, ProductRow} from "./Product";
+import {Product, ProductRaw} from "./Product";
+import {ProductCreateForm} from "./ProductCreateForm";
+import {Category, CategoryRaw} from "./Category";
+import Cookies from 'js-cookie';
+
 
 export interface AppState {
     products: Product[];
+    categories: Category[];
 }
 
 export class App extends React.Component<{}, AppState> {
     constructor(props: Readonly<{}>) {
         super(props);
         this.state = {
-            products: []
+            products: [],
+            categories: []
         };
     }
 
     componentDidMount(): void {
-        var url = "http://localhost:9000/product"
+        const productUrl: string = "http://localhost:9000/productJson";
+        const categoryUrl: string = "http://localhost:9000/categoryJson";
+
+        fetch(productUrl, {
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': 'http://localhost:3000',
+                'Csrf-Token': Cookies.get()["PLAY_CSRF_TOKEN"]
+            },
+            credentials: 'include', // Needed to allow cookies with CORS, see above link
+            method: 'GET',
+        }).then((response: Response) => {
+            return response.json();
+        }).then(data => {
+            let products = data.map((prod: ProductRaw) => Product.convert(prod));
+            this.setState({products});
+        })
+
+        fetch(categoryUrl, {
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': 'http://localhost:3000',
+                'Csrf-Token': Cookies.get()["PLAY_CSRF_TOKEN"]
+            },
+            credentials: 'include', // Needed to allow cookies with CORS, see above link
+            method: 'GET',
+        }).then((response: Response) => {
+            return response.json();
+        }).then(data => {
+            let categories = data.map((categ: CategoryRaw) => Category.convert(categ));
+            this.setState({categories});
+        })
+    }
+
+    private handleProductCreate(productRaw: ProductRaw): void {
+        var url = "http://localhost:9000/product/createJson";
 
         fetch(url, {
             mode: 'cors',
-            headers:{
+            headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin':'http://localhost:3000',
+                'Access-Control-Allow-Origin': 'http://localhost:3000',
+                'Csrf-Token': Cookies.get()["PLAY_CSRF_TOKEN"]
             },
-            method: 'GET',
-        }).then(response => {
-            console.log(response);
+            credentials: 'include', // Needed to allow cookies with CORS, see above link
+            method: 'POST',
+            body: JSON.stringify(productRaw)
+        }).then((response: Response) => {
+            return response.json();
+        }).then(data => {
+            const product: Product = Product.convert(data);
+            this.setState({
+                products: [...this.state.products, product]
+            });
         })
-        // Axios.get("localhost:9000/product", {
-        //     headers: {
-        //         'X-Requested-With': 'XMLHttpRequest'
-        //     },
-        // }).then((response: AxiosResponse<ProductRow[]>) => {
-        //     return response.data.map(productRow => Product.convert(productRow));
-        // }).then((response: Product[]) => {
-        //     this.setState({products: response})
-        // })
-
-        // setInterval(() => {
-        //     this.products.push(new Product(Date.now(), "what", "WHAT", 34213));
-        //     this.forceUpdate();
-        // }, 1000)
     }
 
     render(): JSX.Element {
         return (
             <div>
-                <ProductListPage products={this.state.products} onClick={product => console.log(product)}/>
+                <ProductCreateForm
+                    categories={this.state.categories}
+                    onCreate={this.handleProductCreate.bind(this)}
+                />
+                <ProductListPage
+                    categories={this.state.categories}
+                    products={this.state.products}
+                    onClick={product => console.log(product)}
+                />
             </div>
         );
     }

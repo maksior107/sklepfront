@@ -1,25 +1,41 @@
 import * as React from "react";
 import {Product} from "./Product";
+import {Category} from "./Category";
 
 export interface ProductListPageProps {
+    categories: Category[];
     products: Product[];
-    onClick: (product: Product) => void;
+    onClick?: (product: Product) => void;
 }
 
 export class ProductListPage extends React.Component<ProductListPageProps, {}> {
     render(): JSX.Element {
         return (
-            <div>
+            <table>
+                <thead>
+                <tr>
+                    <th>id</th>
+                    <th>name</th>
+                    <th>description</th>
+                    <th>category</th>
+                </tr>
+
+                </thead>
+                <tbody>
                 {this.props.products.map((product, id) => this.renderProduct(product, id))}
-            </div>
+                </tbody>
+            </table>
         );
     }
 
     private renderProduct(product: Product, id: number): JSX.Element {
-        return <div key={id}
-                    onClick={() => this.props.onClick(product)}>
-            {product?.id}<br/>{product?.name}<br/>{product?.description}<br/>{product?.category}
-        </div>
+        return <tr key={id}
+                   onClick={() => this.props.onClick?.(product)}>
+            <td>{product?.id}</td>
+            <td>{product?.name}</td>
+            <td>{product?.description}</td>
+            <td>{this.props.categories.find(cat => cat.id === product?.category)?.name}</td>
+        </tr>
     }
 }
 

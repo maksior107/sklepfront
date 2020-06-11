@@ -84,6 +84,7 @@ export function App(): JSX.Element {
 			onOrderPlace={handleOrderPlace}
 			orders={orders}
 			findProduct={findProduct}
+			amount={payment?.amount}
 		/>
 	);
 }

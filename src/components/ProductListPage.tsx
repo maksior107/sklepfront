@@ -13,6 +13,7 @@ export interface ProductListPageProps {
 	onOrderPlace: () => void;
 	orders: Order[];
 	findProduct: (cartId: number) => Product | undefined;
+	amount: number | undefined
 }
 
 export function ProductListPage(props: ProductListPageProps): JSX.Element {
@@ -72,6 +73,12 @@ export function ProductListPage(props: ProductListPageProps): JSX.Element {
 				<hr/>
 				{props.orders.map((order: Order): JSX.Element => <div>{props.findProduct(order.cart)?.name}</div>)}
 			</>:<></>}
+			{props.amount !== undefined ? <>
+				<hr/>
+				<div>
+					Sum: {props.amount}
+				</div>
+				</>:<></>}
 		</>
 	);
 }
